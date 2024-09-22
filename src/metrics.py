@@ -1,4 +1,4 @@
-from prometheus_client import start_http_server, Gauge
+from prometheus_client import Gauge
 
 # Define Prometheus metrics for each attribute we want to collect
 gpu_utilization_metric = Gauge('gpu_utilization', 'GPU Utilization', ['rig', 'gpu'])
