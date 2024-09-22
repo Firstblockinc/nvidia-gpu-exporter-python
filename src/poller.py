@@ -5,37 +5,40 @@ from metrics import (
     gpu_memory_free_metric,
     gpu_memory_used_metric,
     gpu_temperature_metric,
-    start_metrics_server
+    gpu_power_consumption_metric
 )
 
 
-def poll_single_rig(rig_ip, rig_label):
-    agent_url = f'http://{rig_ip}:5000/data'  # Assuming the agent runs on port 5000
+class Rig:
+    def __init__(self, ip, label):
+        self.ip = ip
+        self.label = label
 
-    try:
-        response = requests.get(agent_url)
-        response.raise_for_status()  # Raise an error for bad responses
+    def gather_gpus_metrics(self):
+        agent_url = f'http://{self.ip}:5000/data' 
 
-        gpu_data = response.json()
+        try:
+            response = requests.get(agent_url)
+            response.raise_for_status() 
 
-        for gpu in gpu_data:
-            gpu_name = gpu['name']
-            gpu_utilization = gpu['utilization']
-            gpu_temp = gpu['temperature']
-            memory_total = gpu['memory_total']
-            memory_free = gpu['memory_free']
-            memory_used = gpu['memory_used']
+            gpu_data = response.json()
+            for gpu in gpu_data:
+                gpu_model = gpu['name']
+                gpu_id = gpu['id']
+                gpu_utilization = gpu['utilization']
+                gpu_temp = gpu['temperature']
+                memory_total = gpu['memory_total']
+                memory_free = gpu['memory_free']
+                memory_used = gpu['memory_used']
+                power_consumption = gpu['power_consumption']
 
-            gpu_utilization_metric.labels(rig=rig_label, gpu=gpu_name).set(float(gpu_utilization))
-            gpu_temperature_metric.labels(rig=rig_label, gpu=gpu_name).set(float(gpu_temp))
-            gpu_memory_total_metric.labels(rig=rig_label, gpu=gpu_name).set(float(memory_total))
-            gpu_memory_free_metric.labels(rig=rig_label, gpu=gpu_name).set(float(memory_free))
-            gpu_memory_used_metric.labels(rig=rig_label, gpu=gpu_name).set(float(memory_used))
+                gpu_utilization_metric.labels(rig=self.label, ip=self.ip, gpu_model=gpu_model, gpu_id=gpu_id).set(float(gpu_utilization))
+                gpu_temperature_metric.labels(rig=self.label, ip=self.ip, gpu_model=gpu_model, gpu_id=gpu_id).set(float(gpu_temp))
+                gpu_memory_total_metric.labels(rig=self.label, ip=self.ip, gpu_model=gpu_model, gpu_id=gpu_id).set(float(memory_total))
+                gpu_memory_free_metric.labels(rig=self.label, ip=self.ip, gpu_model=gpu_model, gpu_id=gpu_id).set(float(memory_free))
+                gpu_memory_used_metric.labels(rig=self.label, ip=self.ip, gpu_model=gpu_model, gpu_id=gpu_id).set(float(memory_used))
+                gpu_power_consumption_metric.labels(rig=self.label, ip=self.ip, gpu_model=gpu_model, gpu_id=gpu_id).set(float(power_consumption))
 
-    except requests.exceptions.RequestException as e:
-        print(f"Failed to get GPU data from {rig_ip}: {e}")
+        except requests.exceptions.RequestException as e:
+            print(f"Failed to get GPU data from {self.ip}: {e}")
 
-def poll_all_rigs(rigs):
-        for rig in rigs:
-            rig_ip, rig_label = rig['ip'], rig['label']
-            poll_single_rig(rig_ip, rig_label)
