@@ -1,6 +1,6 @@
 import requests
 import logging
-from metrics import (
+from src.metrics import (
     gpu_utilization_metric,
     gpu_memory_total_metric,
     gpu_memory_free_metric,
