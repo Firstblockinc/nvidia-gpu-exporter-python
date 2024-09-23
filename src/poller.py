@@ -1,4 +1,5 @@
 import requests
+import logging
 from metrics import (
     gpu_utilization_metric,
     gpu_memory_total_metric,
@@ -7,6 +8,8 @@ from metrics import (
     gpu_temperature_metric,
     gpu_power_consumption_metric
 )
+
+logging.basicConfig(level=logging.INFO)
 
 
 class Rig:
@@ -39,6 +42,7 @@ class Rig:
                 gpu_memory_used_metric.labels(rig=self.label, ip=self.ip, gpu_model=gpu_model, gpu_id=gpu_id).set(float(memory_used))
                 gpu_power_consumption_metric.labels(rig=self.label, ip=self.ip, gpu_model=gpu_model, gpu_id=gpu_id).set(float(power_consumption))
 
-        except requests.exceptions.RequestException as e:
-            print(f"Failed to get GPU data from {self.ip}: {e}")
+            logging.info(f"Successfully gathered GPU metrics from {self.ip}")
 
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to get GPU data from {self.ip}: {e}")
