@@ -7,17 +7,18 @@ from src.config_loader import load_config
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
-## Setup rig objects and provisioning
+# Setup rig objects and provisioning
 if __name__ == "__main__":
     config = load_config("config.json")
-    rigs = config["rigs"]
+    rigs_config = config["rigs"]
+    rigs = [Rig(ip=rig["ip"], label=rig["label"]) for rig in rigs_config]
 
-    # Start the Prometheus HTTP server
     start_http_server(8000)
     logging.info("Prometheus metrics server started on port 8000.")
 
     while True:
         logging.info("Polling all rigs for metrics...")
-        Rig.gather_gpus_metrics(rigs)
+        for rig in rigs:
+            rig.gather_gpus_metrics()  
         logging.info("Polling completed. Waiting for the next cycle...")
         time.sleep(300)
