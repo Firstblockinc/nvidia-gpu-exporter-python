@@ -1,7 +1,7 @@
 from prometheus_client import start_http_server
 import time
 import logging
-from src.poller import gather_gpus_metrics
+from src.poller import Rig
 from src.config_loader import load_config
 
 # Configure logging
@@ -18,6 +18,6 @@ if __name__ == "__main__":
 
     while True:
         logging.info("Polling all rigs for metrics...")
-        gather_gpus_metrics(rigs)
+        Rig.gather_gpus_metrics(rigs)
         logging.info("Polling completed. Waiting for the next cycle...")
         time.sleep(300)
