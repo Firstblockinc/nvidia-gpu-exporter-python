@@ -23,13 +23,13 @@ class Rig:
 
             gpu_data = response.json()
             for gpu in gpu_data:
-                gpu_model = gpu['name']
+                gpu_model = gpu['model']
                 gpu_id = gpu['id']
                 gpu_utilization = gpu['utilization']
                 gpu_temp = gpu['temperature']
-                memory_total = gpu['memory_total']
-                memory_free = gpu['memory_free']
-                memory_used = gpu['memory_used']
+                memory_used = gpu['vram_used']
+                memory_free = gpu['vram_free']
+                memory_total = gpu['vram_total']
                 power_consumption = gpu['power_consumption']
 
                 gpu_utilization_metric.labels(rig=self.label, ip=self.ip, gpu_model=gpu_model, gpu_id=gpu_id).set(float(gpu_utilization))
